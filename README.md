@@ -1,94 +1,71 @@
-# IDX Flow Engine v2
+# IDX Flow Engine V3
 
-A research-first Python scaffold for an adaptive IDX broker-flow engine with **EOD + intraday microstructure** blocks.
+V3 menambahkan layer yang belum ada di V2:
+- adaptive broker reclassification
+- regime-aware weighting
+- drift monitor
+- final verdict engine yang tidak statis
 
-## Scope of v2
+## Yang baru di V3
 
-This version adds starter implementations for:
-- done-detail ingestion
-- orderbook top-5 ingestion
-- tape feature extraction
-- orderbook imbalance / tension / spoof-risk proxies
-- transfer-suspicion proxy
-- intraday microstructure scoring
-- combined EOD + intraday watchlist output
+### 1. Broker reclassification
+Broker tidak lagi di-hardcode sebagai institusi / retail permanen. Sistem mengelompokkan broker berdasarkan perilaku rolling:
+- activity rank
+- breadth rank
+- directionality
+- stability
 
-## What is still starter-grade
+Output utama:
+- `adaptive_broker_label`
+- `institutional_like_score`
+- `retail_like_score`
+- `hybrid_score`
+- `broker_profile_confidence`
 
-This is still a **research scaffold**, not a finished production platform.
-What remains inferential / incomplete:
-- true broker identity
-- true custody inventory
-- true hidden-order detection
-- definitive crossing proof
-- real-time queue update / cancel event stream logic
+### 2. Regime engine
+Sistem membaca state pasar menjadi:
+- `BULL`
+- `CHOP`
+- `BEAR`
 
-## Commands
+### 3. Adaptive weights
+Bobot long / sell berubah mengikuti regime. Di bull market, breakout lebih penting. Di bear market, distribution penalty lebih besar.
 
-Run EOD pipeline first:
+### 4. Drift monitor
+Monitor ini mengecek apakah distribusi score recent mulai bergeser jauh dari reference window. Kalau iya, sinyal long akan diberi penalty.
 
+## Jalankan
+
+### EOD baseline
 ```bash
 python -m src.pipelines.run_eod_pipeline
 ```
 
-Run intraday pipeline:
-
+### Intraday layer
 ```bash
 python -m src.pipelines.run_intraday_pipeline
 ```
 
-Run dashboard:
+### V3 adaptive verdict
+```bash
+python -m src.pipelines.run_v3_pipeline
+```
 
+### Dashboard
 ```bash
 streamlit run app/streamlit_app.py
 ```
 
-## New outputs
+## Output V3
+`data/features/`
+- `ticker_scores_v3.parquet`
+- `latest_watchlist_v3.csv`
+- `broker_profiles_latest.csv`
+- `regime_daily.csv`
+- `drift_report.csv`
 
-Written to `data/features/`:
-- `intraday_signals.parquet`
-- `latest_intraday_signals.csv`
-- `combined_watchlist_intraday.csv` (if EOD output exists)
-
-## Data expectations
-
-### done_detail_intraday
-Required columns:
-- `timestamp`, `trade_date`, `ticker`, `price`, `lot`, `buyer_broker`, `seller_broker`, `side_aggressor`, `trade_seq`
-
-### orderbook_intraday
-Required columns:
-- `timestamp`, `trade_date`, `ticker`
-- `bid_1_price` ... `bid_5_price`
-- `bid_1_lot` ... `bid_5_lot`
-- `offer_1_price` ... `offer_5_price`
-- `offer_1_lot` ... `offer_5_lot`
-
-## New logic blocks
-
-### Done detail features
-- buy/sell aggressor ratio
-- same-second burst count
-- sweep-like detection
-- child-order cluster score
-- top pair concentration
-- tape conviction proxy
-
-### Orderbook features
-- top-3 and depth imbalance
-- spread level and stability
-- offer wall persistence
-- bid wall persistence
-- breakout tension proxy
-- spoof-risk proxy
-
-### Combined interpretation
-The engine now distinguishes between:
-- EOD setup is good but microstructure is weak
-- EOD setup is good and microstructure confirms
-- EOD setup is mediocre but tape/orderbook is improving
-
-## Caveats
-
-The intraday layer currently uses **snapshot inference**, not full queue-event replay.
-So it is useful as a confirmation block, but still not enough to claim hidden intent as fact.
+## Catatan penting
+- V3 tetap inference engine, bukan alat yang tahu niat pelaku 100%
+- crossing / transfer masih probabilistic
+- institutional level tetap proxy, bukan custody truth
+- paling cocok dijadikan research engine dulu, baru production setelah data feed lu matang

@@ -1,0 +1,43 @@
+regime_profiles:
+  BULL:
+    accumulation_quality_weight: 0.28
+    breakout_integrity_weight: 0.27
+    dry_score_weight: 0.14
+    microstructure_strength_weight: 0.16
+    macro_alignment_weight: 0.15
+    distribution_penalty_weight: 0.24
+    ready_long_threshold: 72
+    watch_threshold: 58
+    sell_threshold: 78
+  CHOP:
+    accumulation_quality_weight: 0.32
+    breakout_integrity_weight: 0.18
+    dry_score_weight: 0.16
+    microstructure_strength_weight: 0.12
+    macro_alignment_weight: 0.22
+    distribution_penalty_weight: 0.28
+    ready_long_threshold: 76
+    watch_threshold: 60
+    sell_threshold: 74
+  BEAR:
+    accumulation_quality_weight: 0.22
+    breakout_integrity_weight: 0.12
+    dry_score_weight: 0.10
+    microstructure_strength_weight: 0.11
+    macro_alignment_weight: 0.25
+    distribution_penalty_weight: 0.40
+    ready_long_threshold: 80
+    watch_threshold: 64
+    sell_threshold: 68
+
+drift:
+  mean_shift_warn: 0.35
+  mean_shift_critical: 0.75
+  std_ratio_warn_low: 0.60
+  std_ratio_warn_high: 1.60
+  max_penalty: 0.22
+
+thresholds:
+  avoid_distribution_risk: 72
+  hard_sell_distribution_risk: 82
+  low_confidence_cutoff: 55

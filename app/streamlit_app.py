@@ -1,22 +1,15 @@
 from pathlib import Path
-import polars as pl
 import streamlit as st
+import pandas as pd
 
-st.set_page_config(page_title="IDX Flow Engine v1", layout="wide")
+st.set_page_config(page_title="IDX Flow Engine V3", layout="wide")
+st.title("IDX Flow Engine V3")
+st.caption("Adaptive broker-flow scaffold: EOD + intraday + regime-aware verdict")
 
-st.title("IDX Flow Engine v1")
-st.caption("EOD-first adaptive broker-flow watchlist scaffold")
-
-watchlist_path = Path("data/features/latest_watchlist.csv")
-if not watchlist_path.exists():
-    st.warning("Run `python -m src.pipelines.run_eod_pipeline` first.")
+watchlist_path = Path("data/features/latest_watchlist_v3.csv")
+if watchlist_path.exists():
+    df = pd.read_csv(watchlist_path)
+    st.subheader("Latest V3 Watchlist")
+    st.dataframe(df, use_container_width=True)
 else:
-    df = pl.read_csv(watchlist_path)
-    verdicts = sorted(df["verdict"].unique().to_list()) if "verdict" in df.columns else []
-    selected = st.multiselect("Verdict filter", verdicts, default=verdicts)
-    if selected:
-        df = df.filter(pl.col("verdict").is_in(selected))
-    st.dataframe(df.to_pandas(), use_container_width=True, hide_index=True)
-
-
-st.caption("v2 scaffold includes EOD + intraday microstructure starter modules.")
+    st.info("Run python -m src.pipelines.run_v3_pipeline first.")
