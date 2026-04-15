@@ -47,3 +47,36 @@ python -m src.pipelines.run_real_eod_smoke
 - This smoke test is **price-side only**.
 - It does **not** infer broker accumulation, done-detail, order-book, or crossing yet.
 - For the full broker-flow engine, you still need real `broker_summary_daily.csv`, `done_detail_intraday.csv`, and `orderbook_intraday.csv`.
+
+
+## Real-data adapters (v4.4)
+
+This build now includes adapter pipelines so you can replace demo CSVs with real files without rewriting the schema.
+
+### 1) Bootstrap template files
+```bash
+python -m src.pipelines.bootstrap_real_workspace
+```
+
+### 2) Import a real EOD prices CSV into engine schema
+```bash
+python -m src.pipelines.import_prices_csv --input /path/to/your_prices.csv --output data/raw/prices_daily_real.csv
+```
+If your source file has no ticker column and contains only one ticker, add `--ticker BBCA`.
+
+### 3) Import a real broker summary CSV into engine schema
+```bash
+python -m src.pipelines.import_broker_summary_csv --input /path/to/your_broker_summary.csv --output data/raw/broker_summary_daily_real.csv
+```
+You can optionally pass `--format stockbit_like` or `--format idx_like`, plus `--ticker` / `--date` when the source file omits them.
+
+### 4) Fetch a quick real EOD smoke test from Yahoo Finance
+```bash
+python -m src.pipelines.fetch_real_eod_yfinance --start 2025-01-01
+python -m src.pipelines.run_real_eod_smoke --prices data/raw/prices_daily_real.csv
+```
+
+### Notes
+- `prices_daily.csv` and `broker_summary_daily.csv` in `data/raw/` are still demo files unless you replace them.
+- `prices_daily_real.csv` and `broker_summary_daily_real.csv` are the intended real-data paths for smoke tests.
+- The app will show which dataset is active and how many real tickers / brokers were loaded.

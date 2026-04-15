@@ -1,0 +1,2 @@
+date,ticker,open,high,low,close,adj_close,volume_shares,turnover_value,sector,industry,board,free_float_shares,market_cap,is_suspended,corporate_action_flag
+2026-04-15,BBCA,9000,9150,8950,9100,9100,1000000,9100000000,Financials,Banks,Main,24000000000,220000000000000,False,

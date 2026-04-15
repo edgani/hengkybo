@@ -1,0 +1,2 @@
+date,ticker,broker_code,buy_lot,buy_value,sell_lot,sell_value,buy_avg,sell_avg,net_lot,net_value,gross_activity_lot,gross_activity_value
+2026-04-15,BBCA,AI,1000,910000000,200,182000000,9100,9100,800,728000000,1200,1092000000
