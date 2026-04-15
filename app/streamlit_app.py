@@ -29,9 +29,9 @@ with c3:
     st.metric('Rows in watchlist', len(watch))
 
 if 'ticker' in prices.columns:
-    st.caption('Tickers loaded: ' + ', '.join(map(str, sorted(prices['ticker'].unique())[:20]))) )
+    st.caption('Tickers loaded: ' + ', '.join(map(str, sorted(prices['ticker'].unique())[:20])))
 if 'broker_code' in brokers.columns:
-    st.caption('Broker codes loaded: ' + ', '.join(map(str, sorted(brokers['broker_code'].unique())[:50]))) )
+    st.caption('Broker codes loaded: ' + ', '.join(map(str, sorted(brokers['broker_code'].unique())[:50])))
 
 st.subheader('Latest Watchlist')
 st.dataframe(watch, use_container_width=True)
