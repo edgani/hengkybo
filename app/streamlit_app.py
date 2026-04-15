@@ -17,3 +17,6 @@ else:
     if selected:
         df = df.filter(pl.col("verdict").is_in(selected))
     st.dataframe(df.to_pandas(), use_container_width=True, hide_index=True)
+
+
+st.caption("v2 scaffold includes EOD + intraday microstructure starter modules.")

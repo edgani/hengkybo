@@ -1,87 +1,94 @@
-# IDX Flow Engine v1
+# IDX Flow Engine v2
 
-A research-first Python scaffold for an adaptive IDX broker-flow watchlist engine.
+A research-first Python scaffold for an adaptive IDX broker-flow engine with **EOD + intraday microstructure** blocks.
 
-## Scope of v1
+## Scope of v2
 
-This version is intentionally **EOD-first**:
-- Daily price/volume ingestion
-- Daily broker summary ingestion
-- Daily foreign flow ingestion
-- Broker inventory / cost-basis estimates with decay
-- Phase / subphase detection
-- Dry vs wet supply-pressure proxy
-- Distribution risk / breakout integrity / accumulation quality scoring
-- Final watchlist verdicts: `READY_LONG`, `WATCH`, `AVOID`, `TRIM_SELL`, `NEUTRAL`
+This version adds starter implementations for:
+- done-detail ingestion
+- orderbook top-5 ingestion
+- tape feature extraction
+- orderbook imbalance / tension / spoof-risk proxies
+- transfer-suspicion proxy
+- intraday microstructure scoring
+- combined EOD + intraday watchlist output
 
-What it does **not** do yet:
-- Live bid-offer / top-5 depth interpretation
-- Done-detail clustering
-- Crossing graph / transfer suspicion from tape
-- Live microstructure confirmation
+## What is still starter-grade
 
-Those belong in v2+.
+This is still a **research scaffold**, not a finished production platform.
+What remains inferential / incomplete:
+- true broker identity
+- true custody inventory
+- true hidden-order detection
+- definitive crossing proof
+- real-time queue update / cancel event stream logic
 
-## Design principles
+## Commands
 
-1. **Probabilistic, not mystical**
-   - No hard claim about “bandar identity” or hidden intent.
-   - Broker labels are behavior-based and should decay over time.
-2. **Modular**
-   - Inventory, phase, dry/wet, scoring, and validation are separate.
-3. **Adaptive**
-   - Regime-aware weights are configurable.
-4. **Testable**
-   - Every verdict should be traceable to features and thresholds.
-
-## Suggested workflow
-
-1. Put raw CSV/Parquet files into `data/raw/`
-2. Configure source paths in `config/data_sources.yaml`
-3. Run:
+Run EOD pipeline first:
 
 ```bash
 python -m src.pipelines.run_eod_pipeline
 ```
 
-4. Start dashboard:
+Run intraday pipeline:
+
+```bash
+python -m src.pipelines.run_intraday_pipeline
+```
+
+Run dashboard:
 
 ```bash
 streamlit run app/streamlit_app.py
 ```
 
-## Raw data expectations
+## New outputs
 
-### prices_daily
+Written to `data/features/`:
+- `intraday_signals.parquet`
+- `latest_intraday_signals.csv`
+- `combined_watchlist_intraday.csv` (if EOD output exists)
+
+## Data expectations
+
+### done_detail_intraday
 Required columns:
-- `date`, `ticker`, `open`, `high`, `low`, `close`, `volume_shares`
-Optional:
-- `turnover_value`, `free_float_shares`, `sector`, `industry`, `board`
+- `timestamp`, `trade_date`, `ticker`, `price`, `lot`, `buyer_broker`, `seller_broker`, `side_aggressor`, `trade_seq`
 
-### broker_summary_daily
+### orderbook_intraday
 Required columns:
-- `date`, `ticker`, `broker_code`, `buy_lot`, `buy_value`, `sell_lot`, `sell_value`
+- `timestamp`, `trade_date`, `ticker`
+- `bid_1_price` ... `bid_5_price`
+- `bid_1_lot` ... `bid_5_lot`
+- `offer_1_price` ... `offer_5_price`
+- `offer_1_lot` ... `offer_5_lot`
 
-### foreign_daily
-Required columns:
-- `date`, `ticker`, `foreign_buy_lot`, `foreign_sell_lot`
-Optional:
-- `foreign_ownership_pct`, `foreign_buy_value`, `foreign_sell_value`
+## New logic blocks
 
-## Project layout
+### Done detail features
+- buy/sell aggressor ratio
+- same-second burst count
+- sweep-like detection
+- child-order cluster score
+- top pair concentration
+- tape conviction proxy
 
-- `src/features/` feature builders
-- `src/analytics/` higher-level research logic
-- `src/scoring/` score aggregation and verdict mapping
-- `src/models/` labeling and walk-forward validation tools
-- `src/pipelines/` batch jobs
-- `app/` Streamlit UI
-- `db/` schema and views
-- `config/` YAML config
+### Orderbook features
+- top-3 and depth imbalance
+- spread level and stability
+- offer wall persistence
+- bid wall persistence
+- breakout tension proxy
+- spoof-risk proxy
 
-## Important caveats
+### Combined interpretation
+The engine now distinguishes between:
+- EOD setup is good but microstructure is weak
+- EOD setup is good and microstructure confirms
+- EOD setup is mediocre but tape/orderbook is improving
 
-- v1 estimates inventory using **decayed broker flow**, not true custody data.
-- Institutional support/resistance are **inference bands**, not exact hidden inventory.
-- Without intraday raw feed, breakout integrity is still incomplete.
-- Before trusting the watchlist, run walk-forward validation per regime, sector, and liquidity bucket.
+## Caveats
+
+The intraday layer currently uses **snapshot inference**, not full queue-event replay.
+So it is useful as a confirmation block, but still not enough to claim hidden intent as fact.
