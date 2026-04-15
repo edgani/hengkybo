@@ -1,6 +1,13 @@
-project_name: idx_flow_engine_v1
-market: IDX
-timezone: Asia/Jakarta
-lot_size: 100
-output_dir: data/features
-asof_mode: latest
+paths:
+  raw: data/raw
+  features: data/features
+  models: data/models
+model:
+  train_window_days: 100
+  valid_window_days: 30
+  test_window_days: 20
+  horizon_days: 10
+  target_return: 0.08
+  max_adverse: -0.04
+  ready_long_prob: 0.65
+  watch_prob: 0.55

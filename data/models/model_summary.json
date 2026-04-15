@@ -1,0 +1,5 @@
+{
+  "train_auc": 0.9073749838480424,
+  "calibration_method": "isotonic",
+  "latest_date": "2026-04-15"
+}

@@ -1,0 +1,2 @@
+method,brier_before,brier_after,train_auc
+isotonic,0.07554812811623372,0.01604938271604938,0.9073749838480424

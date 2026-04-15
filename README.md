@@ -1,71 +1,40 @@
-# IDX Flow Engine V3
+# IDX Flow Engine V4
 
-V3 menambahkan layer yang belum ada di V2:
-- adaptive broker reclassification
-- regime-aware weighting
-- drift monitor
-- final verdict engine yang tidak statis
+V4 is the most complete scaffold in this series. It upgrades the earlier research scaffold into a **demo-runnable pandas engine** with:
 
-## Yang baru di V3
+- daily broker-flow features
+- dynamic broker reclassification
+- broker inventory and institutional levels
+- intraday tape and order-book confirmation
+- rule-based scores
+- walk-forward ranking model
+- isotonic calibration
+- verdict mapping and explanations
+- dashboard starter
 
-### 1. Broker reclassification
-Broker tidak lagi di-hardcode sebagai institusi / retail permanen. Sistem mengelompokkan broker berdasarkan perilaku rolling:
-- activity rank
-- breadth rank
-- directionality
-- stability
+## What this is
+A probability engine for **Ready Long / Watch / Avoid / Trim-Sell** style decision support.
 
-Output utama:
-- `adaptive_broker_label`
-- `institutional_like_score`
-- `retail_like_score`
-- `hybrid_score`
-- `broker_profile_confidence`
+## What this is not
+It is not a magical tool that knows true custody or true intent of every participant.
 
-### 2. Regime engine
-Sistem membaca state pasar menjadi:
-- `BULL`
-- `CHOP`
-- `BEAR`
-
-### 3. Adaptive weights
-Bobot long / sell berubah mengikuti regime. Di bull market, breakout lebih penting. Di bear market, distribution penalty lebih besar.
-
-### 4. Drift monitor
-Monitor ini mengecek apakah distribusi score recent mulai bergeser jauh dari reference window. Kalau iya, sinyal long akan diberi penalty.
-
-## Jalankan
-
-### EOD baseline
+## Run
 ```bash
-python -m src.pipelines.run_eod_pipeline
-```
-
-### Intraday layer
-```bash
-python -m src.pipelines.run_intraday_pipeline
-```
-
-### V3 adaptive verdict
-```bash
-python -m src.pipelines.run_v3_pipeline
-```
-
-### Dashboard
-```bash
+python -m src.pipelines.run_v4_pipeline
 streamlit run app/streamlit_app.py
 ```
 
-## Output V3
-`data/features/`
-- `ticker_scores_v3.parquet`
-- `latest_watchlist_v3.csv`
+## Main outputs
+Inside `data/features/`:
+- `feature_store_v4.csv`
+- `latest_watchlist_v4.csv`
+- `walk_forward_metrics.csv`
+- `walk_forward_predictions.csv`
 - `broker_profiles_latest.csv`
-- `regime_daily.csv`
-- `drift_report.csv`
+- `intraday_features_v4.csv`
+- `calibration_report.csv`
 
-## Catatan penting
-- V3 tetap inference engine, bukan alat yang tahu niat pelaku 100%
-- crossing / transfer masih probabilistic
-- institutional level tetap proxy, bukan custody truth
-- paling cocok dijadikan research engine dulu, baru production setelah data feed lu matang
+## Key design notes
+- synthetic-but-structured demo data is included so the package can be run immediately
+- replace `data/raw/*.csv` with real feeds to move from demo to real research
+- the most fragile inference remains transfer/crossing detection and true inventory estimation
