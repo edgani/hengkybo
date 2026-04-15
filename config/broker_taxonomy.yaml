@@ -1,0 +1,10 @@
+windows: [20, 60, 120, 250]
+prior_hints:
+  enabled: false
+  weight: 0.05
+labels:
+  - institutional_like
+  - retail_like
+  - hybrid
+  - accumulator
+  - distributor

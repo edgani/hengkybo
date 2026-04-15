@@ -1,0 +1,23 @@
+thresholds:
+  ready_long_min: 75
+  ready_long_max_distribution_risk: 35
+  watch_min: 60
+  watch_max_breakout_integrity: 65
+  avoid_min_distribution_risk: 70
+  trim_sell_min: 75
+
+weights:
+  verdict_long:
+    accumulation_quality_score: 0.30
+    breakout_integrity_score: 0.25
+    dry_score: 0.15
+    microstructure_strength_score: 0.15
+    macro_alignment_score: 0.15
+    distribution_risk_score: -0.30
+
+  verdict_sell:
+    distribution_risk_score: 0.35
+    wet_score: 0.20
+    phase_deterioration_score: 0.15
+    microstructure_weakness_score: 0.15
+    macro_headwind_score: 0.15

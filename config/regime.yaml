@@ -1,0 +1,17 @@
+regime_buckets:
+  - bull
+  - chop
+  - bear
+weights_by_regime:
+  bull:
+    breakout_integrity_boost: 1.10
+    accumulation_quality_boost: 1.00
+    distribution_risk_boost: 0.90
+  chop:
+    breakout_integrity_boost: 0.90
+    accumulation_quality_boost: 1.10
+    distribution_risk_boost: 1.00
+  bear:
+    breakout_integrity_boost: 0.80
+    accumulation_quality_boost: 0.95
+    distribution_risk_boost: 1.20

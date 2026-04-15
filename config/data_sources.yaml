@@ -1,0 +1,3 @@
+prices_daily: data/raw/prices_daily.csv
+broker_summary_daily: data/raw/broker_summary_daily.csv
+foreign_daily: data/raw/foreign_daily.csv

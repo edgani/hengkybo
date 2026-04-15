@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idx-flow-engine-v1"
+version = "0.1.0"
+description = "Adaptive IDX broker-flow watchlist engine scaffold"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "OpenAI"}]
+dependencies = [
+  "polars>=1.7.0",
+  "pandas>=2.2.0",
+  "numpy>=1.26.0",
+  "pyyaml>=6.0.2",
+  "pydantic>=2.8.0",
+  "duckdb>=1.1.0",
+  "plotly>=5.24.0",
+  "streamlit>=1.39.0",
+  "scikit-learn>=1.5.0",
+  "networkx>=3.3",
+  "pyarrow>=17.0.0",
+  "pytest>=8.3.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

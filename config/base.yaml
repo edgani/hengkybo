@@ -1,0 +1,6 @@
+project_name: idx_flow_engine_v1
+market: IDX
+timezone: Asia/Jakarta
+lot_size: 100
+output_dir: data/features
+asof_mode: latest
