@@ -43,7 +43,7 @@ def main() -> None:
     foreign['foreign_alignment_score'] = np.where(foreign['foreign_net_20d'] > 0, 70, np.where(foreign['foreign_net_20d'] < 0, 30, 50))
 
     regime = build_regime(prices)
-    intraday = build_intraday_features(done, book)
+    intraday, burst_events = build_intraday_features(done, book)
     labels = label_forward_outcomes(prices, horizon_days=cfg['model']['horizon_days'], target_return=cfg['model']['target_return'], max_adverse=cfg['model']['max_adverse'])
 
     prof_mean = broker_profiles.groupby('date', as_index=False)['broker_profile_confidence'].mean().rename(columns={'broker_profile_confidence':'broker_profile_confidence_mean'})
@@ -59,8 +59,24 @@ def main() -> None:
     feat['phase_deterioration_score'] = np.where(feat['phase'].isin(['MARKDOWN','DISTRIBUTION']), 75, np.where(feat['phase'].eq('LATE_MARKUP'), 55, 35))
 
     latest_intra = intraday.sort_values('date').groupby('ticker', as_index=False).tail(1)
-    feat = feat.merge(latest_intra[['ticker','date','tape_conviction_score','transfer_suspicion','spoof_risk_score','book_support_score','microstructure_strength_score','microstructure_weakness_score']], on=['ticker','date'], how='left')
-    feat[['tape_conviction_score','transfer_suspicion','spoof_risk_score','book_support_score','microstructure_strength_score','microstructure_weakness_score']] = feat[['tape_conviction_score','transfer_suspicion','spoof_risk_score','book_support_score','microstructure_strength_score','microstructure_weakness_score']].fillna(50)
+    feat = feat.merge(latest_intra[[
+        'ticker','date','tape_conviction_score','tape_weakness_score','transfer_suspicion','spoof_risk_score','book_support_score','book_pressure_down_score','offer_consumption_score','bid_consumption_score',
+        'microstructure_strength_score','microstructure_weakness_score','gulungan_up_score','gulungan_down_score','effort_result_up','effort_result_down',
+        'post_up_followthrough_score','post_down_followthrough_score','absorption_after_up_score','absorption_after_down_score','bullish_burst_score_intraday','bearish_burst_score_intraday','bull_trap_score_intraday','bear_trap_score_intraday','dominant_burst_direction','dominant_event_label'
+    ]], on=['ticker','date'], how='left')
+    fill_defaults = {
+        'tape_conviction_score': 50, 'tape_weakness_score': 50, 'transfer_suspicion': 50, 'spoof_risk_score': 50,
+        'book_support_score': 50, 'book_pressure_down_score': 50, 'offer_consumption_score': 50, 'bid_consumption_score': 50,
+        'microstructure_strength_score': 50, 'microstructure_weakness_score': 50,
+        'gulungan_up_score': 0, 'gulungan_down_score': 0,
+        'effort_result_up': 50, 'effort_result_down': 50,
+        'post_up_followthrough_score': 50, 'post_down_followthrough_score': 50,
+        'absorption_after_up_score': 50, 'absorption_after_down_score': 50,
+        'bullish_burst_score_intraday': 20, 'bearish_burst_score_intraday': 20,
+        'bull_trap_score_intraday': 20, 'bear_trap_score_intraday': 20,
+    }
+    for _col, _default in fill_defaults.items():
+        feat[_col] = feat[_col].fillna(_default)
 
     feat = build_scores(feat)
 
@@ -86,11 +102,12 @@ def main() -> None:
     latest_date = score_df['date'].max()
     latest = score_df[score_df['date'] == latest_date].copy().sort_values(['verdict','calibrated_prob','rule_long_score'], ascending=[True, False, False])
 
-    feature_cols_out = ['date','ticker','sector','phase','phase_confidence','regime','accumulation_quality_score','breakout_integrity_score','distribution_risk_score','microstructure_strength_score','dry_score','wet_score','macro_alignment_score','foreign_alignment_score','broker_alignment_score','institutional_support','institutional_resistance','model_prob_raw','calibrated_prob','blended_long_prob','rule_long_score','verdict','confidence','why_now','invalidation']
+    feature_cols_out = ['date','ticker','sector','phase','phase_confidence','regime','accumulation_quality_score','breakout_integrity_score','distribution_risk_score','microstructure_strength_score','microstructure_weakness_score','dry_score','wet_score','macro_alignment_score','foreign_alignment_score','broker_alignment_score','institutional_support','institutional_resistance','gulungan_up_score','gulungan_down_score','bullish_burst_score','bearish_burst_score','bull_trap_score','bear_trap_score','dominant_burst_label_context','burst_note','model_prob_raw','calibrated_prob','blended_long_prob','rule_long_score','rule_rebound_score','verdict','confidence','why_now','invalidation']
     score_df.to_csv(feat_dir/'feature_store_v4.csv', index=False)
     latest[feature_cols_out].to_csv(feat_dir/'latest_watchlist_v4.csv', index=False)
     broker_profiles.sort_values(['date','broker_profile_confidence'], ascending=[True,False]).groupby('broker_code', as_index=False).tail(1).to_csv(feat_dir/'broker_profiles_latest.csv', index=False)
     intraday.to_csv(feat_dir/'intraday_features_v4.csv', index=False)
+    burst_events.to_csv(feat_dir/'burst_events_v47.csv', index=False)
     pd.DataFrame([{'method':cal.method,'brier_before':cal.brier_before,'brier_after':cal.brier_after,'train_auc':ranker.train_auc}]).to_csv(feat_dir/'calibration_report.csv', index=False)
     save_ranker(ranker, str(model_dir/'ranker.joblib'))
     with open(model_dir/'model_summary.json', 'w', encoding='utf-8') as f:

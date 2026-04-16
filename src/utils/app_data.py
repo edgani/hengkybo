@@ -36,6 +36,7 @@ class WorkspaceSnapshot:
     metrics: pd.DataFrame
     profiles: pd.DataFrame
     intraday: pd.DataFrame
+    burst_events: pd.DataFrame
     calibration: pd.DataFrame
     regime: pd.DataFrame
     drift: pd.DataFrame
@@ -68,6 +69,7 @@ def load_workspace() -> WorkspaceSnapshot:
         metrics=read_csv_if_exists(FEATURES / 'walk_forward_metrics.csv'),
         profiles=read_csv_if_exists(FEATURES / 'broker_profiles_latest.csv'),
         intraday=read_csv_if_exists(FEATURES / 'intraday_features_v4.csv'),
+        burst_events=read_csv_if_exists(FEATURES / 'burst_events_v47.csv'),
         calibration=read_csv_if_exists(FEATURES / 'calibration_report.csv'),
         regime=read_csv_if_exists(FEATURES / 'regime_daily.csv'),
         drift=read_csv_if_exists(FEATURES / 'drift_report.csv'),
