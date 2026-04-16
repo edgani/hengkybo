@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -15,14 +15,14 @@ from src.utils.app_data import (
     summarize_columns,
 )
 
-st.set_page_config(page_title='IDX Flow Engine V4.8', layout='wide')
+st.set_page_config(page_title='IDX Flow Engine V4.10 Clean Deploy', layout='wide')
 
 ws = load_workspace()
 qa = data_quality_report(ws.prices, ws.brokers, ws.broker_master)
 
 
 def render_home() -> None:
-    st.title('IDX Flow Engine V4.8')
+    st.title('IDX Flow Engine V4.10 Clean Deploy')
     st.caption('Single-file app mode. Ini sengaja dibuat tanpa `st.navigation` dan tanpa folder `pages/` supaya lebih tahan error di deployment.')
 
     if ws.prices_mode == 'DEMO' or ws.brokers_mode == 'DEMO':

@@ -1,0 +1,6 @@
+Use a fresh folder/repo for deployment.
+App file path: streamlit_app.py
+Do not deploy over an old repo that still contains pages/ or app/pages/.
+If reusing a repo, delete any pages/ directories before deploying.
+Recommended local smoke test:
+  streamlit run streamlit_app.py
