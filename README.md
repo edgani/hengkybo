@@ -80,3 +80,20 @@ python -m src.pipelines.run_real_eod_smoke --prices data/raw/prices_daily_real.c
 - `prices_daily.csv` and `broker_summary_daily.csv` in `data/raw/` are still demo files unless you replace them.
 - `prices_daily_real.csv` and `broker_summary_daily_real.csv` are the intended real-data paths for smoke tests.
 - The app will show which dataset is active and how many real tickers / brokers were loaded.
+
+
+## V4.5 additions
+- Multipage Streamlit app with working pages:
+  - Watchlist
+  - Ticker Detail
+  - Intraday Microstructure
+  - Broker Profiles
+  - Data Audit
+  - Adaptive Monitor
+- Better workspace detection for REAL vs DEMO data
+- `python -m src.pipelines.audit_raw_data` now writes:
+  - `data/features/raw_data_audit.json`
+  - `data/features/broker_coverage_report.csv`
+- New helper: `python -m src.pipelines.rebuild_workspace`
+- New optional fetcher for broker master from official IDX member pages:
+  - `python -m src.pipelines.fetch_idx_broker_master`

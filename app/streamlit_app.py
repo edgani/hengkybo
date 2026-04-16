@@ -1,84 +1,55 @@
-import pandas as pd
+import sys
 from pathlib import Path
 
-try:
-    import streamlit as st
-except Exception:
-    raise SystemExit('Streamlit is not installed. Install requirements and run `streamlit run app/streamlit_app.py`.')
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-DATA = Path(__file__).resolve().parents[1] / 'data'
-FEATURES = DATA / 'features'
-RAW = DATA / 'raw'
+import streamlit as st
+from src.utils.app_data import load_workspace, data_quality_report
 
+ws = load_workspace()
+qa = data_quality_report(ws.prices, ws.brokers, ws.broker_master)
 
-def read_csv_if_exists(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path) if path.exists() else pd.DataFrame()
+st.set_page_config(page_title='IDX Flow Engine V4.5', layout='wide')
+st.title('IDX Flow Engine V4.5')
 
-
-def choose_raw_file(real_name: str, demo_name: str) -> tuple[Path, str]:
-    real_path = RAW / real_name
-    demo_path = RAW / demo_name
-    if real_path.exists():
-        return real_path, 'REAL'
-    return demo_path, 'DEMO'
-
-
-prices_path, prices_mode = choose_raw_file('prices_daily_real.csv', 'prices_daily.csv')
-brokers_path, brokers_mode = choose_raw_file('broker_summary_daily_real.csv', 'broker_summary_daily.csv')
-watch_real = FEATURES / 'latest_watchlist_real_eod.csv'
-watch_demo = FEATURES / 'latest_watchlist_v4.csv'
-watch_path = watch_real if watch_real.exists() else watch_demo
-watch_mode = 'REAL_EOD_SMOKE' if watch_real.exists() else 'DEMO_V4'
-
-st.set_page_config(page_title='IDX Flow Engine V4.4', layout='wide')
-st.title('IDX Flow Engine V4.4')
-
-watch = read_csv_if_exists(watch_path)
-metrics = read_csv_if_exists(FEATURES / 'walk_forward_metrics.csv')
-profiles = read_csv_if_exists(FEATURES / 'broker_profiles_latest.csv')
-prices = read_csv_if_exists(prices_path)
-brokers = read_csv_if_exists(brokers_path)
-
-if prices_mode == 'DEMO' or brokers_mode == 'DEMO':
-    st.warning('Part of the current workspace still uses demo data. Replace data/raw/*.csv or import real files with the adapter pipelines.')
+if ws.prices_mode == 'DEMO' or ws.brokers_mode == 'DEMO':
+    st.warning('Workspace masih campur demo atau sample data. Untuk hasil real, import prices dan broker summary real dulu.')
 else:
-    st.success('Real raw files detected for both prices and broker summary.')
+    st.success('Workspace sudah deteksi raw prices dan broker summary real.')
 
-meta1, meta2, meta3 = st.columns(3)
-with meta1:
-    st.metric('Prices source', prices_mode)
-with meta2:
-    st.metric('Broker source', brokers_mode)
-with meta3:
-    st.metric('Watchlist source', watch_mode)
+m1, m2, m3, m4 = st.columns(4)
+m1.metric('Prices source', ws.prices_mode)
+m2.metric('Broker source', ws.brokers_mode)
+m3.metric('Watchlist source', ws.watch_mode)
+m4.metric('Raw tickers', qa['ticker_count'])
 
-info1, info2, info3 = st.columns(3)
-with info1:
-    st.metric('Raw tickers', int(prices['ticker'].nunique()) if 'ticker' in prices.columns else 0)
-with info2:
-    st.metric('Raw brokers', int(brokers['broker_code'].nunique()) if 'broker_code' in brokers.columns else 0)
-with info3:
-    st.metric('Rows in watchlist', len(watch))
+m5, m6, m7, m8 = st.columns(4)
+m5.metric('Raw brokers', qa['broker_count'])
+m6.metric('Broker master rows', qa['broker_master_count'])
+m7.metric('Broker master loaded', qa['broker_master_loaded_count'])
+m8.metric('Watchlist rows', len(ws.watch))
 
-if 'ticker' in prices.columns:
-    tickers = ', '.join(map(str, sorted(prices['ticker'].dropna().astype(str).unique())[:40]))
-    st.caption('Tickers loaded: ' + tickers)
-if 'broker_code' in brokers.columns:
-    codes = ', '.join(map(str, sorted(brokers['broker_code'].dropna().astype(str).unique())[:60]))
-    st.caption('Broker codes loaded: ' + codes)
+st.caption('Prices file: ' + str(ws.prices_path))
+st.caption('Broker file: ' + str(ws.brokers_path))
 
-if not watch.empty and 'verdict' in watch.columns:
-    st.subheader('Watchlist breakdown')
-    vc = watch['verdict'].value_counts().rename_axis('verdict').reset_index(name='count')
-    st.dataframe(vc, use_container_width=True, hide_index=True)
+c1, c2 = st.columns(2)
+with c1:
+    st.subheader('Ticker coverage')
+    st.write(', '.join(qa['tickers_preview']) if qa['tickers_preview'] else 'No tickers loaded.')
+with c2:
+    st.subheader('Broker coverage')
+    st.write(', '.join(qa['brokers_preview']) if qa['brokers_preview'] else 'No broker codes loaded.')
 
-st.subheader('Latest Watchlist')
-st.dataframe(watch, use_container_width=True)
+if not ws.watch.empty:
+    st.subheader('Latest Watchlist')
+    st.dataframe(ws.watch, use_container_width=True, hide_index=True)
 
-col1, col2 = st.columns(2)
-with col1:
+x1, x2 = st.columns(2)
+with x1:
     st.subheader('Walk-forward Metrics')
-    st.dataframe(metrics, use_container_width=True)
-with col2:
-    st.subheader('Latest Broker Profiles')
-    st.dataframe(profiles, use_container_width=True)
+    st.dataframe(ws.metrics, use_container_width=True, hide_index=True)
+with x2:
+    st.subheader('Calibration Report')
+    st.dataframe(ws.calibration, use_container_width=True, hide_index=True)

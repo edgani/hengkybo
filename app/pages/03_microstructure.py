@@ -1,13 +1,18 @@
+import sys
 from pathlib import Path
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import streamlit as st
-import pandas as pd
+from src.utils.app_data import load_workspace
 
-st.set_page_config(page_title="Microstructure", layout="wide")
-st.title("Intraday Microstructure")
+st.set_page_config(page_title='Intraday Microstructure', layout='wide')
+st.title('Intraday Microstructure')
+ws = load_workspace()
 
-path = Path("data/features/latest_intraday_signals.csv")
-if not path.exists():
-    st.info("Run `python -m src.pipelines.run_intraday_pipeline` first.")
+if ws.intraday.empty:
+    st.info('No intraday feature file detected yet. Run intraday pipeline when done-detail/orderbook real data sudah ada.')
 else:
-    df = pd.read_csv(path)
-    st.dataframe(df, use_container_width=True)
+    st.caption(f'Rows: {len(ws.intraday)}')
+    st.dataframe(ws.intraday, use_container_width=True, hide_index=True)

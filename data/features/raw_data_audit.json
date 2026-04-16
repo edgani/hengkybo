@@ -1,0 +1,18 @@
+{
+  "ticker_count": 1,
+  "broker_count": 1,
+  "broker_master_count": 10,
+  "broker_master_loaded_count": 1,
+  "price_rows": 1,
+  "broker_rows": 1,
+  "prices_min_date": "2026-04-15",
+  "prices_max_date": "2026-04-15",
+  "brokers_min_date": "2026-04-15",
+  "brokers_max_date": "2026-04-15",
+  "tickers_preview": [
+    "BBCA"
+  ],
+  "brokers_preview": [
+    "AI"
+  ]
+}
